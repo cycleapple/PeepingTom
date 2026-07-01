@@ -7,8 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Peeping Tom", "Peeping Tom\
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9B879446-A687-4B9D-8628-807CCB8C51AE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Peeping Tom.Ipc", "Peeping Tom.Ipc\Peeping Tom.Ipc.csproj", "{F454FB15-2C11-44F3-A651-E5F912F0FE11}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -19,10 +17,6 @@ Global
 		{888F98DF-AF1D-4852-8411-11B1FEEFE674}.Debug|x64.Build.0 = Debug|x64
 		{888F98DF-AF1D-4852-8411-11B1FEEFE674}.Release|x64.ActiveCfg = Release|x64
 		{888F98DF-AF1D-4852-8411-11B1FEEFE674}.Release|x64.Build.0 = Release|x64
-		{F454FB15-2C11-44F3-A651-E5F912F0FE11}.Debug|x64.ActiveCfg = Debug|x64
-		{F454FB15-2C11-44F3-A651-E5F912F0FE11}.Debug|x64.Build.0 = Debug|x64
-		{F454FB15-2C11-44F3-A651-E5F912F0FE11}.Release|x64.ActiveCfg = Release|x64
-		{F454FB15-2C11-44F3-A651-E5F912F0FE11}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
