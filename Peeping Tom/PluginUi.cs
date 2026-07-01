@@ -1,9 +1,8 @@
-﻿using ImGuiNET;
-using NAudio.Wave;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.SubKinds;
@@ -11,346 +10,406 @@ using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
-using Dalamud.Interface;
+using Dalamud.Interface.Utility;
+using NAudio.Wave;
 using PeepingTom.Ipc;
 using PeepingTom.Resources;
 
-namespace PeepingTom {
-    internal class PluginUi : IDisposable {
-        private PeepingTomPlugin Plugin { get; }
-
-        private uint? PreviousFocus { get; set; } = new();
+namespace PeepingTom
+{
+    internal class PluginUi(PeepingTomPlugin plugin) : IDisposable
+    {
+        private ulong? PreviousFocus { get; set; } = new();
 
         private bool _wantsOpen;
 
-        public bool WantsOpen {
-            get => this._wantsOpen;
-            set => this._wantsOpen = value;
+        public bool WantsOpen
+        {
+            get => _wantsOpen;
+            set => _wantsOpen = value;
         }
 
         public bool Visible { get; private set; }
 
         private bool _settingsOpen;
 
-        public bool SettingsOpen {
-            get => this._settingsOpen;
-            set => this._settingsOpen = value;
+        public bool SettingsOpen
+        {
+            get => _settingsOpen;
+            set => _settingsOpen = value;
         }
 
-        public PluginUi(PeepingTomPlugin plugin) {
-            this.Plugin = plugin;
+        public void Dispose()
+        {
+            WantsOpen = false;
+            SettingsOpen = false;
         }
 
-        public void Dispose() {
-            this.WantsOpen = false;
-            this.SettingsOpen = false;
-        }
-
-        public void Draw() {
-            if (this.Plugin.InPvp) {
+        public void Draw()
+        {
+            if (plugin.InPvp)
+            {
                 return;
             }
 
-            if (this.SettingsOpen) {
-                this.ShowSettings();
+            if (SettingsOpen)
+            {
+                ShowSettings();
             }
 
-            var inCombat = this.Plugin.Condition[ConditionFlag.InCombat];
-            var inInstance = this.Plugin.Condition[ConditionFlag.BoundByDuty]
-                             || this.Plugin.Condition[ConditionFlag.BoundByDuty56]
-                             || this.Plugin.Condition[ConditionFlag.BoundByDuty95];
-            var inCutscene = this.Plugin.Condition[ConditionFlag.WatchingCutscene]
-                             || this.Plugin.Condition[ConditionFlag.WatchingCutscene78]
-                             || this.Plugin.Condition[ConditionFlag.OccupiedInCutSceneEvent];
+            var inCombat = plugin.Condition[ConditionFlag.InCombat];
+            var inInstance =
+                plugin.Condition[ConditionFlag.BoundByDuty]
+                || plugin.Condition[ConditionFlag.BoundByDuty56]
+                || plugin.Condition[ConditionFlag.BoundByDuty95];
+            var inCutscene =
+                plugin.Condition[ConditionFlag.WatchingCutscene]
+                || plugin.Condition[ConditionFlag.WatchingCutscene78]
+                || plugin.Condition[ConditionFlag.OccupiedInCutSceneEvent];
 
             // FIXME: this could just be a boolean expression
-            var shouldBeShown = this.WantsOpen;
-            if (inCombat && !this.Plugin.Config.ShowInCombat) {
+            var shouldBeShown = WantsOpen;
+            if (inCombat && !plugin.Config.ShowInCombat)
+            {
                 shouldBeShown = false;
-            } else if (inInstance && !this.Plugin.Config.ShowInInstance) {
+            }
+            else if (inInstance && !plugin.Config.ShowInInstance)
+            {
                 shouldBeShown = false;
-            } else if (inCutscene && !this.Plugin.Config.ShowInCutscenes) {
+            }
+            else if (inCutscene && !plugin.Config.ShowInCutscenes)
+            {
                 shouldBeShown = false;
             }
 
-            this.Visible = shouldBeShown;
+            Visible = shouldBeShown;
 
-            if (shouldBeShown) {
-                this.ShowMainWindow();
+            if (shouldBeShown)
+            {
+                ShowMainWindow();
             }
 
-            const ImGuiWindowFlags flags = ImGuiWindowFlags.NoBackground
-                                           | ImGuiWindowFlags.NoTitleBar
-                                           | ImGuiWindowFlags.NoNav
-                                           | ImGuiWindowFlags.NoNavInputs
-                                           | ImGuiWindowFlags.NoFocusOnAppearing
-                                           | ImGuiWindowFlags.NoNavFocus
-                                           | ImGuiWindowFlags.NoInputs
-                                           | ImGuiWindowFlags.NoMouseInputs
-                                           | ImGuiWindowFlags.NoSavedSettings
-                                           | ImGuiWindowFlags.NoDecoration
-                                           | ImGuiWindowFlags.NoScrollWithMouse;
+            const ImGuiWindowFlags flags =
+                ImGuiWindowFlags.NoBackground
+                | ImGuiWindowFlags.NoTitleBar
+                | ImGuiWindowFlags.NoNav
+                | ImGuiWindowFlags.NoNavInputs
+                | ImGuiWindowFlags.NoFocusOnAppearing
+                | ImGuiWindowFlags.NoNavFocus
+                | ImGuiWindowFlags.NoInputs
+                | ImGuiWindowFlags.NoMouseInputs
+                | ImGuiWindowFlags.NoSavedSettings
+                | ImGuiWindowFlags.NoDecoration
+                | ImGuiWindowFlags.NoScrollWithMouse;
             ImGuiHelpers.ForceNextWindowMainViewport();
-            if (!ImGui.Begin("Peeping Tom targeting indicator dummy window", flags)) {
+            if (!ImGui.Begin("Peeping Tom targeting indicator dummy window", flags))
+            {
                 ImGui.End();
                 return;
             }
 
-            if (this.Plugin.Config.MarkTargeted) {
-                this.MarkPlayer(this.GetCurrentTarget(), this.Plugin.Config.TargetedColour, this.Plugin.Config.TargetedSize);
+            if (plugin.Config.MarkTargeted)
+            {
+                MarkPlayer(GetCurrentTarget(), plugin.Config.TargetedColour, plugin.Config.TargetedSize);
             }
 
-            if (!this.Plugin.Config.MarkTargeting) {
+            if (!plugin.Config.MarkTargeting)
+            {
                 goto EndDummy;
             }
 
-            var player = this.Plugin.ClientState.LocalPlayer;
-            if (player == null) {
+            var player = plugin.ObjectTable.LocalPlayer;
+            if (player == null)
+            {
                 goto EndDummy;
             }
 
-            var targeting = this.Plugin.Watcher.CurrentTargeters
-                .Select(targeter => this.Plugin.ObjectTable.FirstOrDefault(obj => obj.ObjectId == targeter.ObjectId))
-                .Where(targeter => targeter is PlayerCharacter)
-                .Cast<PlayerCharacter>()
+            var targeting = plugin
+                .Watcher.CurrentTargeters.Select(targeter =>
+                    plugin.ObjectTable.FirstOrDefault(obj => obj.GameObjectId == targeter.ObjectId)
+                )
+                .Where(targeter => targeter is IPlayerCharacter)
+                .Cast<IPlayerCharacter>()
                 .ToArray();
-            foreach (var targeter in targeting) {
-                this.MarkPlayer(targeter, this.Plugin.Config.TargetingColour, this.Plugin.Config.TargetingSize);
+            foreach (var targeter in targeting)
+            {
+                MarkPlayer(targeter, plugin.Config.TargetingColour, plugin.Config.TargetingSize);
             }
 
             EndDummy:
             ImGui.End();
         }
 
-        private void ShowSettings() {
+        private void ShowSettings()
+        {
             ImGui.SetNextWindowSize(new Vector2(700, 250));
-            var windowTitle = string.Format(Language.SettingsTitle, this.Plugin.Name);
-            if (!ImGui.Begin($"{windowTitle}###ptom-settings", ref this._settingsOpen, ImGuiWindowFlags.NoResize)) {
+            var windowTitle = string.Format(Language.SettingsTitle, PeepingTomPlugin.Name);
+            if (!ImGui.Begin($"{windowTitle}###ptom-settings", ref _settingsOpen, ImGuiWindowFlags.NoResize))
+            {
                 ImGui.End();
                 return;
             }
 
-            if (ImGui.BeginTabBar("##settings-tabs")) {
-                if (ImGui.BeginTabItem($"{Language.SettingsMarkersTab}###markers-tab")) {
-                    var markTargeted = this.Plugin.Config.MarkTargeted;
-                    if (ImGui.Checkbox(Language.SettingsMarkersMarkTarget, ref markTargeted)) {
-                        this.Plugin.Config.MarkTargeted = markTargeted;
-                        this.Plugin.Config.Save();
+            if (ImGui.BeginTabBar("##settings-tabs"))
+            {
+                if (ImGui.BeginTabItem($"{Language.SettingsMarkersTab}###markers-tab"))
+                {
+                    var markTargeted = plugin.Config.MarkTargeted;
+                    if (ImGui.Checkbox(Language.SettingsMarkersMarkTarget, ref markTargeted))
+                    {
+                        plugin.Config.MarkTargeted = markTargeted;
+                        plugin.Config.Save();
                     }
 
-                    var targetedColour = this.Plugin.Config.TargetedColour;
-                    if (ImGui.ColorEdit4(Language.SettingsMarkersMarkTargetColour, ref targetedColour)) {
-                        this.Plugin.Config.TargetedColour = targetedColour;
-                        this.Plugin.Config.Save();
+                    var targetedColour = plugin.Config.TargetedColour;
+                    if (ImGui.ColorEdit4(Language.SettingsMarkersMarkTargetColour, ref targetedColour))
+                    {
+                        plugin.Config.TargetedColour = targetedColour;
+                        plugin.Config.Save();
                     }
 
-                    var targetedSize = this.Plugin.Config.TargetedSize;
-                    if (ImGui.DragFloat(Language.SettingsMarkersMarkTargetSize, ref targetedSize, 0.01f, 0f, 15f)) {
+                    var targetedSize = plugin.Config.TargetedSize;
+                    if (ImGui.DragFloat(Language.SettingsMarkersMarkTargetSize, ref targetedSize, 0.01f, 0f, 15f))
+                    {
                         targetedSize = Math.Max(0f, targetedSize);
-                        this.Plugin.Config.TargetedSize = targetedSize;
-                        this.Plugin.Config.Save();
+                        plugin.Config.TargetedSize = targetedSize;
+                        plugin.Config.Save();
                     }
 
                     ImGui.Spacing();
 
-                    var markTargeting = this.Plugin.Config.MarkTargeting;
-                    if (ImGui.Checkbox(Language.SettingsMarkersMarkTargeting, ref markTargeting)) {
-                        this.Plugin.Config.MarkTargeting = markTargeting;
-                        this.Plugin.Config.Save();
+                    var markTargeting = plugin.Config.MarkTargeting;
+                    if (ImGui.Checkbox(Language.SettingsMarkersMarkTargeting, ref markTargeting))
+                    {
+                        plugin.Config.MarkTargeting = markTargeting;
+                        plugin.Config.Save();
                     }
 
-                    var targetingColour = this.Plugin.Config.TargetingColour;
-                    if (ImGui.ColorEdit4(Language.SettingsMarkersMarkTargetingColour, ref targetingColour)) {
-                        this.Plugin.Config.TargetingColour = targetingColour;
-                        this.Plugin.Config.Save();
+                    var targetingColour = plugin.Config.TargetingColour;
+                    if (ImGui.ColorEdit4(Language.SettingsMarkersMarkTargetingColour, ref targetingColour))
+                    {
+                        plugin.Config.TargetingColour = targetingColour;
+                        plugin.Config.Save();
                     }
 
-                    var targetingSize = this.Plugin.Config.TargetingSize;
-                    if (ImGui.DragFloat(Language.SettingsMarkersMarkTargetingSize, ref targetingSize, 0.01f, 0f, 15f)) {
+                    var targetingSize = plugin.Config.TargetingSize;
+                    if (ImGui.DragFloat(Language.SettingsMarkersMarkTargetingSize, ref targetingSize, 0.01f, 0f, 15f))
+                    {
                         targetingSize = Math.Max(0f, targetingSize);
-                        this.Plugin.Config.TargetingSize = targetingSize;
-                        this.Plugin.Config.Save();
+                        plugin.Config.TargetingSize = targetingSize;
+                        plugin.Config.Save();
                     }
 
                     ImGui.EndTabItem();
                 }
 
-                if (ImGui.BeginTabItem($"{Language.SettingsFilterTab}###filters-tab")) {
-                    var showParty = this.Plugin.Config.LogParty;
-                    if (ImGui.Checkbox(Language.SettingsFilterLogParty, ref showParty)) {
-                        this.Plugin.Config.LogParty = showParty;
-                        this.Plugin.Config.Save();
+                if (ImGui.BeginTabItem($"{Language.SettingsFilterTab}###filters-tab"))
+                {
+                    var showParty = plugin.Config.LogParty;
+                    if (ImGui.Checkbox(Language.SettingsFilterLogParty, ref showParty))
+                    {
+                        plugin.Config.LogParty = showParty;
+                        plugin.Config.Save();
                     }
 
-                    var logAlliance = this.Plugin.Config.LogAlliance;
-                    if (ImGui.Checkbox(Language.SettingsFilterLogAlliance, ref logAlliance)) {
-                        this.Plugin.Config.LogAlliance = logAlliance;
-                        this.Plugin.Config.Save();
+                    var logAlliance = plugin.Config.LogAlliance;
+                    if (ImGui.Checkbox(Language.SettingsFilterLogAlliance, ref logAlliance))
+                    {
+                        plugin.Config.LogAlliance = logAlliance;
+                        plugin.Config.Save();
                     }
 
-                    var logInCombat = this.Plugin.Config.LogInCombat;
-                    if (ImGui.Checkbox(Language.SettingsFilterLogCombat, ref logInCombat)) {
-                        this.Plugin.Config.LogInCombat = logInCombat;
-                        this.Plugin.Config.Save();
+                    var logInCombat = plugin.Config.LogInCombat;
+                    if (ImGui.Checkbox(Language.SettingsFilterLogCombat, ref logInCombat))
+                    {
+                        plugin.Config.LogInCombat = logInCombat;
+                        plugin.Config.Save();
                     }
 
-                    var logSelf = this.Plugin.Config.LogSelf;
-                    if (ImGui.Checkbox(Language.SettingsFilterLogSelf, ref logSelf)) {
-                        this.Plugin.Config.LogSelf = logSelf;
-                        this.Plugin.Config.Save();
-                    }
-
-                    ImGui.EndTabItem();
-                }
-
-                if (ImGui.BeginTabItem($"{Language.SettingsBehaviourTab}###behaviour-tab")) {
-                    var focusTarget = this.Plugin.Config.FocusTargetOnHover;
-                    if (ImGui.Checkbox(Language.SettingsBehaviourFocusHover, ref focusTarget)) {
-                        this.Plugin.Config.FocusTargetOnHover = focusTarget;
-                        this.Plugin.Config.Save();
-                    }
-
-                    var openExamine = this.Plugin.Config.OpenExamine;
-                    if (ImGui.Checkbox(Language.SettingsBehaviourExamineEnabled, ref openExamine)) {
-                        this.Plugin.Config.OpenExamine = openExamine;
-                        this.Plugin.Config.Save();
+                    var logSelf = plugin.Config.LogSelf;
+                    if (ImGui.Checkbox(Language.SettingsFilterLogSelf, ref logSelf))
+                    {
+                        plugin.Config.LogSelf = logSelf;
+                        plugin.Config.Save();
                     }
 
                     ImGui.EndTabItem();
                 }
 
-                if (ImGui.BeginTabItem($"{Language.SettingsSoundTab}###sound-tab")) {
-                    var playSound = this.Plugin.Config.PlaySoundOnTarget;
-                    if (ImGui.Checkbox(Language.SettingsSoundEnabled, ref playSound)) {
-                        this.Plugin.Config.PlaySoundOnTarget = playSound;
-                        this.Plugin.Config.Save();
+                if (ImGui.BeginTabItem($"{Language.SettingsBehaviourTab}###behaviour-tab"))
+                {
+                    var focusTarget = plugin.Config.FocusTargetOnHover;
+                    if (ImGui.Checkbox(Language.SettingsBehaviourFocusHover, ref focusTarget))
+                    {
+                        plugin.Config.FocusTargetOnHover = focusTarget;
+                        plugin.Config.Save();
                     }
 
-                    var path = this.Plugin.Config.SoundPath ?? "";
-                    if (ImGui.InputText(Language.SettingsSoundPath, ref path, 1_000)) {
+                    var openExamine = plugin.Config.OpenExamine;
+                    if (ImGui.Checkbox(Language.SettingsBehaviourExamineEnabled, ref openExamine))
+                    {
+                        plugin.Config.OpenExamine = openExamine;
+                        plugin.Config.Save();
+                    }
+
+                    ImGui.EndTabItem();
+                }
+
+                if (ImGui.BeginTabItem($"{Language.SettingsSoundTab}###sound-tab"))
+                {
+                    var playSound = plugin.Config.PlaySoundOnTarget;
+                    if (ImGui.Checkbox(Language.SettingsSoundEnabled, ref playSound))
+                    {
+                        plugin.Config.PlaySoundOnTarget = playSound;
+                        plugin.Config.Save();
+                    }
+
+                    var path = plugin.Config.SoundPath ?? "";
+                    if (ImGui.InputText(Language.SettingsSoundPath, ref path, 1_000))
+                    {
                         path = path.Trim();
-                        this.Plugin.Config.SoundPath = path.Length == 0 ? null : path;
-                        this.Plugin.Config.Save();
+                        plugin.Config.SoundPath = path.Length == 0 ? null : path;
+                        plugin.Config.Save();
                     }
 
                     ImGui.Text(Language.SettingsSoundPathHelp);
 
-                    var volume = this.Plugin.Config.SoundVolume * 100f;
-                    if (ImGui.DragFloat(Language.SettingsSoundVolume, ref volume, .1f, 0f, 100f, "%.1f%%")) {
-                        this.Plugin.Config.SoundVolume = Math.Max(0f, Math.Min(1f, volume / 100f));
-                        this.Plugin.Config.Save();
+                    var volume = plugin.Config.SoundVolume * 100f;
+                    if (ImGui.DragFloat(Language.SettingsSoundVolume, ref volume, .1f, 0f, 100f, "%.1f%%"))
+                    {
+                        plugin.Config.SoundVolume = Math.Max(0f, Math.Min(1f, volume / 100f));
+                        plugin.Config.Save();
                     }
 
                     var devices = DirectSoundOut.Devices.ToList();
-                    var soundDevice = devices.FirstOrDefault(d => d.Guid == this.Plugin.Config.SoundDeviceNew);
+                    var soundDevice = devices.FirstOrDefault(d => d.Guid == plugin.Config.SoundDeviceNew);
                     var name = soundDevice != null ? soundDevice.Description : Language.SettingsSoundInvalidDevice;
 
-                    if (ImGui.BeginCombo($"{Language.SettingsSoundOutputDevice}###sound-output-device-combo", name)) {
-                        for (var deviceNum = 0; deviceNum < devices.Count; deviceNum++) {
+                    if (ImGui.BeginCombo($"{Language.SettingsSoundOutputDevice}###sound-output-device-combo", name))
+                    {
+                        for (var deviceNum = 0; deviceNum < devices.Count; deviceNum++)
+                        {
                             var info = devices[deviceNum];
-                            if (!ImGui.Selectable($"{info.Description}##{deviceNum}")) {
+                            if (!ImGui.Selectable($"{info.Description}##{deviceNum}"))
+                            {
                                 continue;
                             }
 
-                            this.Plugin.Config.SoundDeviceNew = info.Guid;
-                            this.Plugin.Config.Save();
+                            plugin.Config.SoundDeviceNew = info.Guid;
+                            plugin.Config.Save();
                         }
 
                         ImGui.EndCombo();
                     }
 
-                    var soundCooldown = this.Plugin.Config.SoundCooldown;
-                    if (ImGui.DragFloat(Language.SettingsSoundCooldown, ref soundCooldown, .01f, 0f, 30f)) {
+                    var soundCooldown = plugin.Config.SoundCooldown;
+                    if (ImGui.DragFloat(Language.SettingsSoundCooldown, ref soundCooldown, .01f, 0f, 30f))
+                    {
                         soundCooldown = Math.Max(0f, soundCooldown);
-                        this.Plugin.Config.SoundCooldown = soundCooldown;
-                        this.Plugin.Config.Save();
+                        plugin.Config.SoundCooldown = soundCooldown;
+                        plugin.Config.Save();
                     }
 
-                    var playWhenClosed = this.Plugin.Config.PlaySoundWhenClosed;
-                    if (ImGui.Checkbox(Language.SettingsSoundPlayWhenClosed, ref playWhenClosed)) {
-                        this.Plugin.Config.PlaySoundWhenClosed = playWhenClosed;
-                        this.Plugin.Config.Save();
+                    var playWhenClosed = plugin.Config.PlaySoundWhenClosed;
+                    if (ImGui.Checkbox(Language.SettingsSoundPlayWhenClosed, ref playWhenClosed))
+                    {
+                        plugin.Config.PlaySoundWhenClosed = playWhenClosed;
+                        plugin.Config.Save();
                     }
 
                     ImGui.EndTabItem();
                 }
 
-                if (ImGui.BeginTabItem($"{Language.SettingsWindowTab}###window-tab")) {
-                    var openOnLogin = this.Plugin.Config.OpenOnLogin;
-                    if (ImGui.Checkbox(Language.SettingsWindowOpenLogin, ref openOnLogin)) {
-                        this.Plugin.Config.OpenOnLogin = openOnLogin;
-                        this.Plugin.Config.Save();
+                if (ImGui.BeginTabItem($"{Language.SettingsWindowTab}###window-tab"))
+                {
+                    var openOnLogin = plugin.Config.OpenOnLogin;
+                    if (ImGui.Checkbox(Language.SettingsWindowOpenLogin, ref openOnLogin))
+                    {
+                        plugin.Config.OpenOnLogin = openOnLogin;
+                        plugin.Config.Save();
                     }
 
-                    var allowMovement = this.Plugin.Config.AllowMovement;
-                    if (ImGui.Checkbox(Language.SettingsWindowAllowMovement, ref allowMovement)) {
-                        this.Plugin.Config.AllowMovement = allowMovement;
-                        this.Plugin.Config.Save();
+                    var allowMovement = plugin.Config.AllowMovement;
+                    if (ImGui.Checkbox(Language.SettingsWindowAllowMovement, ref allowMovement))
+                    {
+                        plugin.Config.AllowMovement = allowMovement;
+                        plugin.Config.Save();
                     }
 
-                    var allowResizing = this.Plugin.Config.AllowResize;
-                    if (ImGui.Checkbox(Language.SettingsWindowAllowResize, ref allowResizing)) {
-                        this.Plugin.Config.AllowResize = allowResizing;
-                        this.Plugin.Config.Save();
+                    var allowResizing = plugin.Config.AllowResize;
+                    if (ImGui.Checkbox(Language.SettingsWindowAllowResize, ref allowResizing))
+                    {
+                        plugin.Config.AllowResize = allowResizing;
+                        plugin.Config.Save();
                     }
 
                     ImGui.Spacing();
 
-                    var showInCombat = this.Plugin.Config.ShowInCombat;
-                    if (ImGui.Checkbox(Language.SettingsWindowShowCombat, ref showInCombat)) {
-                        this.Plugin.Config.ShowInCombat = showInCombat;
-                        this.Plugin.Config.Save();
+                    var showInCombat = plugin.Config.ShowInCombat;
+                    if (ImGui.Checkbox(Language.SettingsWindowShowCombat, ref showInCombat))
+                    {
+                        plugin.Config.ShowInCombat = showInCombat;
+                        plugin.Config.Save();
                     }
 
-                    var showInInstance = this.Plugin.Config.ShowInInstance;
-                    if (ImGui.Checkbox(Language.SettingsWindowShowInstance, ref showInInstance)) {
-                        this.Plugin.Config.ShowInInstance = showInInstance;
-                        this.Plugin.Config.Save();
+                    var showInInstance = plugin.Config.ShowInInstance;
+                    if (ImGui.Checkbox(Language.SettingsWindowShowInstance, ref showInInstance))
+                    {
+                        plugin.Config.ShowInInstance = showInInstance;
+                        plugin.Config.Save();
                     }
 
-                    var showInCutscenes = this.Plugin.Config.ShowInCutscenes;
-                    if (ImGui.Checkbox(Language.SettingsWindowShowCutscene, ref showInCutscenes)) {
-                        this.Plugin.Config.ShowInCutscenes = showInCutscenes;
-                        this.Plugin.Config.Save();
+                    var showInCutscenes = plugin.Config.ShowInCutscenes;
+                    if (ImGui.Checkbox(Language.SettingsWindowShowCutscene, ref showInCutscenes))
+                    {
+                        plugin.Config.ShowInCutscenes = showInCutscenes;
+                        plugin.Config.Save();
                     }
 
                     ImGui.EndTabItem();
                 }
 
-                if (ImGui.BeginTabItem($"{Language.SettingsHistoryTab}###history-tab")) {
-                    var keepHistory = this.Plugin.Config.KeepHistory;
-                    if (ImGui.Checkbox(Language.SettingsHistoryEnabled, ref keepHistory)) {
-                        this.Plugin.Config.KeepHistory = keepHistory;
-                        this.Plugin.Config.Save();
+                if (ImGui.BeginTabItem($"{Language.SettingsHistoryTab}###history-tab"))
+                {
+                    var keepHistory = plugin.Config.KeepHistory;
+                    if (ImGui.Checkbox(Language.SettingsHistoryEnabled, ref keepHistory))
+                    {
+                        plugin.Config.KeepHistory = keepHistory;
+                        plugin.Config.Save();
                     }
 
-                    var historyWhenClosed = this.Plugin.Config.HistoryWhenClosed;
-                    if (ImGui.Checkbox(Language.SettingsHistoryRecordClosed, ref historyWhenClosed)) {
-                        this.Plugin.Config.HistoryWhenClosed = historyWhenClosed;
-                        this.Plugin.Config.Save();
+                    var historyWhenClosed = plugin.Config.HistoryWhenClosed;
+                    if (ImGui.Checkbox(Language.SettingsHistoryRecordClosed, ref historyWhenClosed))
+                    {
+                        plugin.Config.HistoryWhenClosed = historyWhenClosed;
+                        plugin.Config.Save();
                     }
 
-                    var numHistory = this.Plugin.Config.NumHistory;
-                    if (ImGui.InputInt(Language.SettingsHistoryAmount, ref numHistory)) {
+                    var numHistory = plugin.Config.NumHistory;
+                    if (ImGui.InputInt(Language.SettingsHistoryAmount, ref numHistory))
+                    {
                         numHistory = Math.Max(0, Math.Min(50, numHistory));
-                        this.Plugin.Config.NumHistory = numHistory;
-                        this.Plugin.Config.Save();
+                        plugin.Config.NumHistory = numHistory;
+                        plugin.Config.Save();
                     }
 
-                    var showTimestamps = this.Plugin.Config.ShowTimestamps;
-                    if (ImGui.Checkbox(Language.SettingsHistoryTimestamps, ref showTimestamps)) {
-                        this.Plugin.Config.ShowTimestamps = showTimestamps;
-                        this.Plugin.Config.Save();
+                    var showTimestamps = plugin.Config.ShowTimestamps;
+                    if (ImGui.Checkbox(Language.SettingsHistoryTimestamps, ref showTimestamps))
+                    {
+                        plugin.Config.ShowTimestamps = showTimestamps;
+                        plugin.Config.Save();
                     }
 
                     ImGui.EndTabItem();
                 }
 
-                if (ImGui.BeginTabItem($"{Language.SettingsAdvancedTab}###advanced-tab")) {
-                    var pollFrequency = this.Plugin.Config.PollFrequency;
-                    if (ImGui.DragInt(Language.SettingsAdvancedPollFrequency, ref pollFrequency, .1f, 1, 1600)) {
-                        this.Plugin.Config.PollFrequency = pollFrequency;
-                        this.Plugin.Config.Save();
+                if (ImGui.BeginTabItem($"{Language.SettingsAdvancedTab}###advanced-tab"))
+                {
+                    var pollFrequency = plugin.Config.PollFrequency;
+                    if (ImGui.DragInt(Language.SettingsAdvancedPollFrequency, ref pollFrequency, .1f, 1, 1600))
+                    {
+                        plugin.Config.PollFrequency = pollFrequency;
+                        plugin.Config.Save();
                     }
 
                     ImGui.EndTabItem();
@@ -362,37 +421,44 @@ namespace PeepingTom {
             ImGui.End();
         }
 
-        private void ShowMainWindow() {
-            var targeting = this.Plugin.Watcher.CurrentTargeters;
-            var previousTargeters = this.Plugin.Config.KeepHistory ? this.Plugin.Watcher.PreviousTargeters : null;
+        private void ShowMainWindow()
+        {
+            var targeting = plugin.Watcher.CurrentTargeters;
+            var previousTargeters = plugin.Config.KeepHistory ? plugin.Watcher.PreviousTargeters : null;
 
             // to prevent looping over a subset of the actors repeatedly when multiple people are targeting,
             // create a dictionary for O(1) lookups by actor id
-            Dictionary<uint, GameObject>? objects = null;
-            if (targeting.Count + (previousTargeters?.Count ?? 0) > 1) {
-                var dict = new Dictionary<uint, GameObject>();
-                foreach (var obj in this.Plugin.ObjectTable) {
-                    if (dict.ContainsKey(obj.ObjectId) || obj.ObjectKind != ObjectKind.Player) {
+            Dictionary<ulong, IGameObject>? objects = null;
+            if (targeting.Count + (previousTargeters?.Count ?? 0) > 1)
+            {
+                var dict = new Dictionary<ulong, IGameObject>();
+                foreach (var obj in plugin.ObjectTable)
+                {
+                    if (dict.ContainsKey(obj.GameObjectId) || obj.ObjectKind != ObjectKind.Pc)
+                    {
                         continue;
                     }
 
-                    dict.Add(obj.ObjectId, obj);
+                    dict.Add(obj.GameObjectId, obj);
                 }
 
                 objects = dict;
             }
 
             var flags = ImGuiWindowFlags.None;
-            if (!this.Plugin.Config.AllowMovement) {
+            if (!plugin.Config.AllowMovement)
+            {
                 flags |= ImGuiWindowFlags.NoMove;
             }
 
-            if (!this.Plugin.Config.AllowResize) {
+            if (!plugin.Config.AllowResize)
+            {
                 flags |= ImGuiWindowFlags.NoResize;
             }
 
             ImGui.SetNextWindowSize(new Vector2(290, 195), ImGuiCond.FirstUseEver);
-            if (!ImGui.Begin(this.Plugin.Name, ref this._wantsOpen, flags)) {
+            if (!ImGui.Begin(PeepingTomPlugin.Name, ref _wantsOpen, flags))
+            {
                 ImGui.End();
                 return;
             }
@@ -400,15 +466,14 @@ namespace PeepingTom {
             {
                 ImGui.Text(Language.MainTargetingYou);
                 ImGui.SameLine();
-                HelpMarker(this.Plugin.Config.OpenExamine
-                    ? Language.MainHelpExamine
-                    : Language.MainHelpNoExamine);
+                HelpMarker(plugin.Config.OpenExamine ? Language.MainHelpExamine : Language.MainHelpNoExamine);
 
                 var height = ImGui.GetContentRegionAvail().Y;
                 height -= ImGui.GetStyle().ItemSpacing.Y;
 
                 var anyHovered = false;
-                if (ImGui.BeginListBox("##targeting", new Vector2(-1, height))) {
+                if (ImGui.BeginListBox("##targeting", new Vector2(-1, height)))
+                {
                     // add the two first players for testing
                     // foreach (var p in this.Plugin.Interface.ClientState.Actors
                     //     .Where(actor => actor is PlayerCharacter)
@@ -418,48 +483,57 @@ namespace PeepingTom {
                     //     this.AddEntry(new Targeter(p), p, ref anyHovered);
                     // }
 
-                    foreach (var targeter in targeting) {
-                        GameObject? obj = null;
+                    foreach (var targeter in targeting)
+                    {
+                        IGameObject? obj = null;
                         objects?.TryGetValue(targeter.ObjectId, out obj);
-                        this.AddEntry(targeter, obj, ref anyHovered);
+                        AddEntry(targeter, obj, ref anyHovered);
                     }
 
-                    if (this.Plugin.Config.KeepHistory) {
+                    if (plugin.Config.KeepHistory)
+                    {
                         // get a list of the previous targeters that aren't currently targeting
                         var previous = (previousTargeters ?? new List<Targeter>())
                             .Where(old => targeting.All(actor => actor.ObjectId != old.ObjectId))
-                            .Take(this.Plugin.Config.NumHistory);
+                            .Take(plugin.Config.NumHistory);
                         // add previous targeters to the list
-                        foreach (var oldTargeter in previous) {
-                            GameObject? obj = null;
+                        foreach (var oldTargeter in previous)
+                        {
+                            IGameObject? obj = null;
                             objects?.TryGetValue(oldTargeter.ObjectId, out obj);
-                            this.AddEntry(oldTargeter, obj, ref anyHovered, ImGuiSelectableFlags.Disabled);
+                            AddEntry(oldTargeter, obj, ref anyHovered, ImGuiSelectableFlags.Disabled);
                         }
                     }
 
                     ImGui.EndListBox();
                 }
 
-                var previousFocus = this.PreviousFocus;
-                if (this.Plugin.Config.FocusTargetOnHover && !anyHovered && previousFocus != null) {
-                    if (previousFocus == uint.MaxValue) {
-                        this.Plugin.TargetManager.FocusTarget = null;
-                    } else {
-                        var actor = this.Plugin.ObjectTable.FirstOrDefault(a => a.ObjectId == previousFocus);
+                var previousFocus = PreviousFocus;
+                if (plugin.Config.FocusTargetOnHover && !anyHovered && previousFocus != null)
+                {
+                    if (previousFocus == ulong.MaxValue)
+                    {
+                        plugin.TargetManager.FocusTarget = null;
+                    }
+                    else
+                    {
+                        var actor = plugin.ObjectTable.FirstOrDefault(a => a.GameObjectId == previousFocus);
                         // either target the actor if still present or target nothing
-                        this.Plugin.TargetManager.FocusTarget = actor;
+                        plugin.TargetManager.FocusTarget = actor;
                     }
 
-                    this.PreviousFocus = null;
+                    PreviousFocus = null;
                 }
 
                 ImGui.End();
             }
         }
 
-        private static void HelpMarker(string text) {
+        private static void HelpMarker(string text)
+        {
             ImGui.TextDisabled("(?)");
-            if (!ImGui.IsItemHovered()) {
+            if (!ImGui.IsItemHovered())
+            {
                 return;
             }
 
@@ -470,25 +544,35 @@ namespace PeepingTom {
             ImGui.EndTooltip();
         }
 
-        private void AddEntry(Targeter targeter, GameObject? obj, ref bool anyHovered, ImGuiSelectableFlags flags = ImGuiSelectableFlags.None) {
+        private void AddEntry(
+            Targeter targeter,
+            IGameObject? obj,
+            ref bool anyHovered,
+            ImGuiSelectableFlags flags = ImGuiSelectableFlags.None
+        )
+        {
             ImGui.BeginGroup();
 
             ImGui.Selectable(targeter.Name.TextValue, false, flags);
 
-            if (this.Plugin.Config.ShowTimestamps) {
-                var time = DateTime.UtcNow - targeter.When >= TimeSpan.FromDays(1)
-                    ? targeter.When.ToLocalTime().ToString("dd/MM")
-                    : targeter.When.ToLocalTime().ToString("t");
+            if (plugin.Config.ShowTimestamps)
+            {
+                var time =
+                    DateTime.UtcNow - targeter.When >= TimeSpan.FromDays(1)
+                        ? targeter.When.ToLocalTime().ToString("dd/MM")
+                        : targeter.When.ToLocalTime().ToString("t");
                 var windowWidth = ImGui.GetWindowContentRegionMax().X - ImGui.GetWindowContentRegionMin().X;
                 ImGui.SameLine(windowWidth - ImGui.CalcTextSize(time).X);
 
-                if (flags.HasFlag(ImGuiSelectableFlags.Disabled)) {
-                    ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetStyle().Colors[(int) ImGuiCol.TextDisabled]);
+                if (flags.HasFlag(ImGuiSelectableFlags.Disabled))
+                {
+                    ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetStyle().Colors[(int)ImGuiCol.TextDisabled]);
                 }
 
                 ImGui.TextUnformatted(time);
 
-                if (flags.HasFlag(ImGuiSelectableFlags.Disabled)) {
+                if (flags.HasFlag(ImGuiSelectableFlags.Disabled))
+                {
                     ImGui.PopStyleColor();
                 }
             }
@@ -499,73 +583,90 @@ namespace PeepingTom {
             var left = hover && ImGui.IsMouseClicked(ImGuiMouseButton.Left);
             var right = hover && ImGui.IsMouseClicked(ImGuiMouseButton.Right);
 
-            obj ??= this.Plugin.ObjectTable.FirstOrDefault(a => a.ObjectId == targeter.ObjectId);
+            obj ??= plugin.ObjectTable.FirstOrDefault(a => a.GameObjectId == targeter.ObjectId);
 
             // don't count as hovered if the actor isn't here (clears focus target when hovering missing actors)
-            if (obj != null) {
+            if (obj != null)
+            {
                 anyHovered |= hover;
             }
 
-            if (this.Plugin.Config.FocusTargetOnHover && hover && obj != null) {
-                this.PreviousFocus ??= this.Plugin.TargetManager.FocusTarget?.ObjectId ?? uint.MaxValue;
-                this.Plugin.TargetManager.FocusTarget = obj;
+            if (plugin.Config.FocusTargetOnHover && hover && obj != null)
+            {
+                PreviousFocus ??= plugin.TargetManager.FocusTarget?.GameObjectId ?? ulong.MaxValue;
+                plugin.TargetManager.FocusTarget = obj;
             }
 
-            if (left) {
-                if (this.Plugin.Config.OpenExamine && ImGui.GetIO().KeyAlt) {
-                    if (obj != null) {
-                        this.Plugin.Common.Functions.Examine.OpenExamineWindow(obj);
-                    } else {
-                        var error = string.Format(Language.ExamineErrorToast, targeter.Name);
-                        this.Plugin.ToastGui.ShowError(error);
+            if (left)
+            {
+                if (plugin.Config.OpenExamine && ImGui.GetIO().KeyAlt)
+                {
+                    if (obj is IPlayerCharacter player)
+                    {
+                        plugin.ExamineHelper.Open(player);
                     }
-                } else {
+                    else
+                    {
+                        var error = string.Format(Language.ExamineErrorToast, targeter.Name);
+                        plugin.ToastGui.ShowError(error);
+                    }
+                }
+                else
+                {
                     var payload = new PlayerPayload(targeter.Name.TextValue, targeter.HomeWorldId);
                     Payload[] payloads = { payload };
-                    this.Plugin.ChatGui.PrintChat(new XivChatEntry {
-                        Message = new SeString(payloads),
-                    });
+                    plugin.ChatGui.Print(new XivChatEntry { Message = new SeString(payloads) });
                 }
-            } else if (right && obj != null) {
-                this.Plugin.TargetManager.Target = obj;
+            }
+            else if (right && obj != null)
+            {
+                plugin.TargetManager.Target = obj;
             }
         }
 
-        private void MarkPlayer(GameObject? player, Vector4 colour, float size) {
-            if (player == null) {
+        private void MarkPlayer(IGameObject? player, Vector4 colour, float size)
+        {
+            if (player == null)
+            {
                 return;
             }
 
-            if (!this.Plugin.GameGui.WorldToScreen(player.Position, out var screenPos)) {
+            if (!plugin.GameGui.WorldToScreen(player.Position, out var screenPos))
+            {
                 return;
             }
 
             ImGui.PushClipRect(ImGuiHelpers.MainViewport.Pos, ImGuiHelpers.MainViewport.Pos + ImGuiHelpers.MainViewport.Size, false);
 
-            ImGui.GetWindowDrawList().AddCircleFilled(
-                ImGuiHelpers.MainViewport.Pos + new Vector2(screenPos.X, screenPos.Y),
-                size,
-                ImGui.GetColorU32(colour),
-                100
-            );
+            ImGui
+                .GetWindowDrawList()
+                .AddCircleFilled(
+                    ImGuiHelpers.MainViewport.Pos + new Vector2(screenPos.X, screenPos.Y),
+                    size,
+                    ImGui.GetColorU32(colour),
+                    100
+                );
 
             ImGui.PopClipRect();
         }
 
-        private PlayerCharacter? GetCurrentTarget() {
-            var player = this.Plugin.ClientState.LocalPlayer;
-            if (player == null) {
+        private IPlayerCharacter? GetCurrentTarget()
+        {
+            var player = plugin.ObjectTable.LocalPlayer;
+            if (player == null)
+            {
                 return null;
             }
 
             var targetId = player.TargetObjectId;
-            if (targetId <= 0) {
+            if (targetId <= 0)
+            {
                 return null;
             }
 
-            return this.Plugin.ObjectTable
-                .Where(actor => actor.ObjectId == targetId && actor is PlayerCharacter)
-                .Select(actor => actor as PlayerCharacter)
+            return plugin
+                .ObjectTable.Where(actor => actor.GameObjectId == targetId && actor is IPlayerCharacter)
+                .Select(actor => actor as IPlayerCharacter)
                 .FirstOrDefault();
         }
     }

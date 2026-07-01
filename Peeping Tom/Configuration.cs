@@ -1,14 +1,16 @@
-﻿using Dalamud.Configuration;
-using Dalamud.Plugin;
-using System;
+﻿using System;
 using System.Numerics;
+using Dalamud.Configuration;
+using Dalamud.Plugin;
 
-namespace PeepingTom {
+namespace PeepingTom
+{
     [Serializable]
-    internal class Configuration : IPluginConfiguration {
+    internal class Configuration : IPluginConfiguration
+    {
         public int Version { get; set; } = 1;
 
-        private DalamudPluginInterface Interface { get; set; } = null!;
+        private IDalamudPluginInterface Interface { get; set; } = null!;
 
         public bool MarkTargeted { get; set; }
 
@@ -37,6 +39,7 @@ namespace PeepingTom {
         public bool PlaySoundOnTarget { get; set; }
         public string? SoundPath { get; set; }
         public float SoundVolume { get; set; } = 1f;
+
         [Obsolete("use new", true)]
         public int SoundDevice { get; set; } = -1;
         public Guid SoundDeviceNew { get; set; } = Guid.Empty;
@@ -52,12 +55,14 @@ namespace PeepingTom {
 
         public int PollFrequency { get; set; } = 100;
 
-        public void Initialize(DalamudPluginInterface pluginInterface) {
-            this.Interface = pluginInterface;
+        public void Initialize(IDalamudPluginInterface pluginInterface)
+        {
+            Interface = pluginInterface;
         }
 
-        public void Save() {
-            this.Interface.SavePluginConfig(this);
+        public void Save()
+        {
+            Interface.SavePluginConfig(this);
         }
     }
 }

@@ -1,5 +1,4 @@
-﻿namespace PeepingTom.Ipc.From {
-    public interface IFromMessage {
-
-    }
+﻿namespace PeepingTom.Ipc.From
+{
+    public interface IFromMessage { }
 }
