@@ -11,7 +11,6 @@ using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Interface.Utility;
-using NAudio.Wave;
 using PeepingTom.Ipc;
 using PeepingTom.Resources;
 
@@ -249,71 +248,6 @@ namespace PeepingTom
                     if (ImGui.Checkbox(Language.SettingsBehaviourExamineEnabled, ref openExamine))
                     {
                         plugin.Config.OpenExamine = openExamine;
-                        plugin.Config.Save();
-                    }
-
-                    ImGui.EndTabItem();
-                }
-
-                if (ImGui.BeginTabItem($"{Language.SettingsSoundTab}###sound-tab"))
-                {
-                    var playSound = plugin.Config.PlaySoundOnTarget;
-                    if (ImGui.Checkbox(Language.SettingsSoundEnabled, ref playSound))
-                    {
-                        plugin.Config.PlaySoundOnTarget = playSound;
-                        plugin.Config.Save();
-                    }
-
-                    var path = plugin.Config.SoundPath ?? "";
-                    if (ImGui.InputText(Language.SettingsSoundPath, ref path, 1_000))
-                    {
-                        path = path.Trim();
-                        plugin.Config.SoundPath = path.Length == 0 ? null : path;
-                        plugin.Config.Save();
-                    }
-
-                    ImGui.Text(Language.SettingsSoundPathHelp);
-
-                    var volume = plugin.Config.SoundVolume * 100f;
-                    if (ImGui.DragFloat(Language.SettingsSoundVolume, ref volume, .1f, 0f, 100f, "%.1f%%"))
-                    {
-                        plugin.Config.SoundVolume = Math.Max(0f, Math.Min(1f, volume / 100f));
-                        plugin.Config.Save();
-                    }
-
-                    var devices = DirectSoundOut.Devices.ToList();
-                    var soundDevice = devices.FirstOrDefault(d => d.Guid == plugin.Config.SoundDeviceNew);
-                    var name = soundDevice != null ? soundDevice.Description : Language.SettingsSoundInvalidDevice;
-
-                    if (ImGui.BeginCombo($"{Language.SettingsSoundOutputDevice}###sound-output-device-combo", name))
-                    {
-                        for (var deviceNum = 0; deviceNum < devices.Count; deviceNum++)
-                        {
-                            var info = devices[deviceNum];
-                            if (!ImGui.Selectable($"{info.Description}##{deviceNum}"))
-                            {
-                                continue;
-                            }
-
-                            plugin.Config.SoundDeviceNew = info.Guid;
-                            plugin.Config.Save();
-                        }
-
-                        ImGui.EndCombo();
-                    }
-
-                    var soundCooldown = plugin.Config.SoundCooldown;
-                    if (ImGui.DragFloat(Language.SettingsSoundCooldown, ref soundCooldown, .01f, 0f, 30f))
-                    {
-                        soundCooldown = Math.Max(0f, soundCooldown);
-                        plugin.Config.SoundCooldown = soundCooldown;
-                        plugin.Config.Save();
-                    }
-
-                    var playWhenClosed = plugin.Config.PlaySoundWhenClosed;
-                    if (ImGui.Checkbox(Language.SettingsSoundPlayWhenClosed, ref playWhenClosed))
-                    {
-                        plugin.Config.PlaySoundWhenClosed = playWhenClosed;
                         plugin.Config.Save();
                     }
 

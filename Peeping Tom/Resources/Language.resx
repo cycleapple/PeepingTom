@@ -66,36 +66,6 @@
     <data name="SettingsBehaviourExamineEnabled" xml:space="preserve">
         <value>Open examine window on Alt-click</value>
     </data>
-    <data name="SettingsSoundTab" xml:space="preserve">
-        <value>Sound</value>
-    </data>
-    <data name="SettingsSoundEnabled" xml:space="preserve">
-        <value>Play sound when targeted</value>
-    </data>
-    <data name="SettingsSoundPath" xml:space="preserve">
-        <value>Path to audio file</value>
-    </data>
-    <data name="SettingsSoundPathHelp" xml:space="preserve">
-        <value>Leave this blank to use a built-in sound.</value>
-    </data>
-    <data name="SettingsSoundVolume" xml:space="preserve">
-        <value>Volume of sound</value>
-    </data>
-    <data name="SettingsSoundDefaultDevice" xml:space="preserve">
-        <value>Default</value>
-    </data>
-    <data name="SettingsSoundInvalidDevice" xml:space="preserve">
-        <value>Invalid device</value>
-    </data>
-    <data name="SettingsSoundOutputDevice" xml:space="preserve">
-        <value>Output device</value>
-    </data>
-    <data name="SettingsSoundCooldown" xml:space="preserve">
-        <value>Cooldown for sound (seconds)</value>
-    </data>
-    <data name="SettingsSoundPlayWhenClosed" xml:space="preserve">
-        <value>Play sound when window is closed</value>
-    </data>
     <data name="SettingsWindowTab" xml:space="preserve">
         <value>Window</value>
     </data>
@@ -149,8 +119,5 @@
     </data>
     <data name="MainHelpNoExamine" xml:space="preserve">
         <value>Click to link or right click to target.</value>
-    </data>
-    <data name="SoundChatError" xml:space="preserve">
-        <value>Could not play sound file: {0}</value>
     </data>
 </root>

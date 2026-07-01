@@ -103,33 +103,6 @@
   <data name="SettingsBehaviourFocusHover" xml:space="preserve">
     <value>Mettre la cible en cible focalisée au survol</value>
   </data>
-  <data name="SettingsSoundTab" xml:space="preserve">
-    <value>Son</value>
-  </data>
-  <data name="SettingsSoundEnabled" xml:space="preserve">
-    <value>Jouer un son quand vous êtes ciblé·e</value>
-  </data>
-  <data name="SettingsSoundPath" xml:space="preserve">
-    <value>Chemin vers le fichier audio</value>
-  </data>
-  <data name="SettingsSoundPathHelp" xml:space="preserve">
-    <value>Laissez ce champ vide pour utiliser le son par défaut.</value>
-  </data>
-  <data name="SettingsSoundVolume" xml:space="preserve">
-    <value>Volume du son</value>
-  </data>
-  <data name="SettingsSoundDefaultDevice" xml:space="preserve">
-    <value>Défaut</value>
-  </data>
-  <data name="SettingsSoundInvalidDevice" xml:space="preserve">
-    <value>Sortie son invalide</value>
-  </data>
-  <data name="SettingsSoundOutputDevice" xml:space="preserve">
-    <value>Sortie son</value>
-  </data>
-  <data name="SettingsSoundPlayWhenClosed" xml:space="preserve">
-    <value>Jouer un son quand la fenêtre est fermée</value>
-  </data>
   <data name="SettingsWindowTab" xml:space="preserve">
     <value>Fenêtre</value>
   </data>
@@ -172,9 +145,6 @@
   <data name="MainHelpNoExamine" xml:space="preserve">
     <value>Clic gauche pour créer un lien de joueur ou clic droit pour cibler.</value>
   </data>
-  <data name="SoundChatError" xml:space="preserve">
-    <value>Impossible de jouer le fichier audio : {0}</value>
-  </data>
   <data name="SettingsTitle" xml:space="preserve">
     <value>Paramètres de {0}</value>
   </data>
@@ -186,9 +156,6 @@
   </data>
   <data name="SettingsBehaviourExamineEnabled" xml:space="preserve">
     <value>Ouvrir la fenêtre d'examination avec Alt+Clic gauche</value>
-  </data>
-  <data name="SettingsSoundCooldown" xml:space="preserve">
-    <value>Cooldown pour le son (en secondes)</value>
   </data>
   <data name="SettingsWindowAllowResize" xml:space="preserve">
     <value>Permettre le redimensionnement de la fenêtre principale</value>

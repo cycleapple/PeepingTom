@@ -97,33 +97,6 @@
   <data name="SettingsBehaviourExamineEnabled" xml:space="preserve">
     <value>Abrir ventana de examinar al hacer Alt-click</value>
   </data>
-  <data name="SettingsSoundTab" xml:space="preserve">
-    <value>Sonido</value>
-  </data>
-  <data name="SettingsSoundEnabled" xml:space="preserve">
-    <value>Reproducir sonido cuando te tengan como objetivo</value>
-  </data>
-  <data name="SettingsSoundPath" xml:space="preserve">
-    <value>Ruta al archivo de sonido</value>
-  </data>
-  <data name="SettingsSoundPathHelp" xml:space="preserve">
-    <value>Deja ésto vacío para usar un sonido propio.</value>
-  </data>
-  <data name="SettingsSoundVolume" xml:space="preserve">
-    <value>Volumen del sonido</value>
-  </data>
-  <data name="SettingsSoundDefaultDevice" xml:space="preserve">
-    <value>Predeterminado</value>
-  </data>
-  <data name="SettingsSoundOutputDevice" xml:space="preserve">
-    <value>Dispositivo de salida</value>
-  </data>
-  <data name="SettingsSoundCooldown" xml:space="preserve">
-    <value>Tiempo de espera para el sonido (segundos)</value>
-  </data>
-  <data name="SettingsSoundPlayWhenClosed" xml:space="preserve">
-    <value>Reproducir sonido con la ventana cerrada</value>
-  </data>
   <data name="SettingsWindowTab" xml:space="preserve">
     <value>Ventana</value>
   </data>
@@ -166,9 +139,6 @@
   <data name="MainHelpNoExamine" xml:space="preserve">
     <value>Haz click para enlazar o click derecho para seleccionar como objetivo.</value>
   </data>
-  <data name="SoundChatError" xml:space="preserve">
-    <value>No se ha podido reproducir archivo de sonido: {0}</value>
-  </data>
   <data name="SettingsMarkersMarkTargetSize" xml:space="preserve">
     <value>Tamaño de la marca de objetivo</value>
   </data>
@@ -177,9 +147,6 @@
   </data>
   <data name="SettingsBehaviourFocusHover" xml:space="preserve">
     <value>Hacer focus target al pasar el ratón por encima</value>
-  </data>
-  <data name="SettingsSoundInvalidDevice" xml:space="preserve">
-    <value>Dispositivo inválido</value>
   </data>
   <data name="SettingsWindowAllowMovement" xml:space="preserve">
     <value>Permitir mover la ventana principal</value>

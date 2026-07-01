@@ -91,27 +91,6 @@
   <data name="SettingsFilterLogSelf" xml:space="preserve">
     <value>あなた自身のログを有効化</value>
   </data>
-  <data name="SettingsSoundTab" xml:space="preserve">
-    <value>サウンド</value>
-  </data>
-  <data name="SettingsSoundEnabled" xml:space="preserve">
-    <value>ターゲットされたら音を鳴らす</value>
-  </data>
-  <data name="SettingsSoundPathHelp" xml:space="preserve">
-    <value>内蔵のサウンドを使用する場合は、この項目を空白にします。</value>
-  </data>
-  <data name="SettingsSoundVolume" xml:space="preserve">
-    <value>音の大きさ</value>
-  </data>
-  <data name="SettingsSoundDefaultDevice" xml:space="preserve">
-    <value>デフォルト</value>
-  </data>
-  <data name="SettingsSoundInvalidDevice" xml:space="preserve">
-    <value>無効なデバイス</value>
-  </data>
-  <data name="SettingsSoundCooldown" xml:space="preserve">
-    <value>サウンドのクールダウン(秒)</value>
-  </data>
   <data name="SettingsWindowTab" xml:space="preserve">
     <value>ウィンドウ</value>
   </data>
@@ -166,9 +145,6 @@
   <data name="MainHelpNoExamine" xml:space="preserve">
     <value>クリックするとチャットログに対象のリンクを、右クリックでターゲットします。</value>
   </data>
-  <data name="SoundChatError" xml:space="preserve">
-    <value>音声ファイルが再生できませんでした: {0}</value>
-  </data>
   <data name="SettingsTitle" xml:space="preserve">
     <value>{0} 設定</value>
   </data>
@@ -180,15 +156,6 @@
   </data>
   <data name="SettingsFilterLogCombat" xml:space="preserve">
     <value>戦闘中のプレイヤーのログを有効化</value>
-  </data>
-  <data name="SettingsSoundPath" xml:space="preserve">
-    <value>音声ファイルのパス</value>
-  </data>
-  <data name="SettingsSoundOutputDevice" xml:space="preserve">
-    <value>出力デバイス</value>
-  </data>
-  <data name="SettingsSoundPlayWhenClosed" xml:space="preserve">
-    <value>ウィンドウを閉じていても音を鳴らす</value>
   </data>
   <data name="SettingsWindowShowCutscene" xml:space="preserve">
     <value>カットシーン中にウィンドウを表示</value>

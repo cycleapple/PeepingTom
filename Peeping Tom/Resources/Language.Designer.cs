@@ -295,96 +295,6 @@ namespace PeepingTom.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Cooldown for sound (seconds).
-        /// </summary>
-        internal static string SettingsSoundCooldown {
-            get {
-                return ResourceManager.GetString("SettingsSoundCooldown", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Default.
-        /// </summary>
-        internal static string SettingsSoundDefaultDevice {
-            get {
-                return ResourceManager.GetString("SettingsSoundDefaultDevice", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Play sound when targeted.
-        /// </summary>
-        internal static string SettingsSoundEnabled {
-            get {
-                return ResourceManager.GetString("SettingsSoundEnabled", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Invalid device.
-        /// </summary>
-        internal static string SettingsSoundInvalidDevice {
-            get {
-                return ResourceManager.GetString("SettingsSoundInvalidDevice", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Output device.
-        /// </summary>
-        internal static string SettingsSoundOutputDevice {
-            get {
-                return ResourceManager.GetString("SettingsSoundOutputDevice", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Path to audio file.
-        /// </summary>
-        internal static string SettingsSoundPath {
-            get {
-                return ResourceManager.GetString("SettingsSoundPath", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Leave this blank to use a built-in sound..
-        /// </summary>
-        internal static string SettingsSoundPathHelp {
-            get {
-                return ResourceManager.GetString("SettingsSoundPathHelp", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Play sound when window is closed.
-        /// </summary>
-        internal static string SettingsSoundPlayWhenClosed {
-            get {
-                return ResourceManager.GetString("SettingsSoundPlayWhenClosed", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Sound.
-        /// </summary>
-        internal static string SettingsSoundTab {
-            get {
-                return ResourceManager.GetString("SettingsSoundTab", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Volume of sound.
-        /// </summary>
-        internal static string SettingsSoundVolume {
-            get {
-                return ResourceManager.GetString("SettingsSoundVolume", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to {0} settings.
         /// </summary>
         internal static string SettingsTitle {
@@ -456,13 +366,5 @@ namespace PeepingTom.Resources {
             }
         }
         
-        /// <summary>
-        ///   Looks up a localized string similar to Could not play sound file: {0}.
-        /// </summary>
-        internal static string SoundChatError {
-            get {
-                return ResourceManager.GetString("SoundChatError", resourceCulture);
-            }
-        }
     }
 }

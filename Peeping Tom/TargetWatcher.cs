@@ -1,18 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Threading;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.ClientState.Objects.Types;
-using Dalamud.Game.Text;
 using Dalamud.Plugin.Services;
-using NAudio.Wave;
 using PeepingTom.Ipc;
-using PeepingTom.Resources;
 
 namespace PeepingTom
 {
@@ -21,8 +15,6 @@ namespace PeepingTom
         private PeepingTomPlugin Plugin { get; }
 
         private Stopwatch UpdateWatch { get; } = new();
-        private Stopwatch? SoundWatch { get; set; }
-        private int LastTargetAmount { get; set; }
 
         private Targeter[] Current { get; set; } = Array.Empty<Targeter>();
 
@@ -101,15 +93,6 @@ namespace PeepingTom
             Current = newCurrent;
 
             HandleHistory(Current);
-
-            // play sound if necessary
-            if (CanPlaySound())
-            {
-                SoundWatch?.Restart();
-                PlaySound();
-            }
-
-            LastTargetAmount = Current.Length;
         }
 
         private void HandleHistory(Targeter[] targeting)
@@ -155,96 +138,5 @@ namespace PeepingTom
         private static bool InParty(IPlayerCharacter actor) => actor.StatusFlags.HasFlag(StatusFlags.PartyMember);
 
         private static bool InAlliance(IPlayerCharacter actor) => actor.StatusFlags.HasFlag(StatusFlags.AllianceMember);
-
-        private bool CanPlaySound()
-        {
-            if (!Plugin.Config.PlaySoundOnTarget)
-            {
-                return false;
-            }
-
-            if (Current.Length <= LastTargetAmount)
-            {
-                return false;
-            }
-
-            if (!Plugin.Config.PlaySoundWhenClosed && !Plugin.Ui.Visible)
-            {
-                return false;
-            }
-
-            if (SoundWatch == null)
-            {
-                SoundWatch = new Stopwatch();
-                return true;
-            }
-
-            var secs = SoundWatch.Elapsed.TotalSeconds;
-            return secs >= Plugin.Config.SoundCooldown;
-        }
-
-        private void PlaySound()
-        {
-            var soundDevice = DirectSoundOut.Devices.FirstOrDefault(d => d.Guid == Plugin.Config.SoundDeviceNew);
-            if (soundDevice == null)
-            {
-                return;
-            }
-
-            new Thread(() =>
-            {
-                WaveStream reader;
-                try
-                {
-                    if (Plugin.Config.SoundPath == null)
-                    {
-                        reader = new WaveFileReader(GetEmbeddedSound());
-                    }
-                    else
-                    {
-                        reader = new MediaFoundationReader(Plugin.Config.SoundPath);
-                    }
-                }
-                catch (Exception e)
-                {
-                    var error = string.Format(Language.SoundChatError, e.Message);
-                    SendError(error);
-                    return;
-                }
-
-                using var channel = new WaveChannel32(reader) { Volume = Plugin.Config.SoundVolume, PadWithZeroes = false };
-
-                using (reader)
-                {
-                    using var output = new DirectSoundOut(soundDevice.Guid);
-
-                    try
-                    {
-                        output.Init(channel);
-                        output.Play();
-
-                        while (output.PlaybackState == PlaybackState.Playing)
-                        {
-                            Thread.Sleep(500);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Plugin.Log.Error(ex, "Exception playing sound");
-                    }
-                }
-            }).Start();
-        }
-
-        private void SendError(string message)
-        {
-            Plugin.ChatGui.Print(new XivChatEntry { Message = $"[{PeepingTomPlugin.Name}] {message}", Type = XivChatType.ErrorMessage });
-        }
-
-        private static Stream GetEmbeddedSound()
-        {
-            return Assembly.GetExecutingAssembly().GetManifestResourceStream("PeepingTom.Resources.target.wav")
-                ?? throw new InvalidOperationException("Missing embedded target sound");
-        }
     }
 }
