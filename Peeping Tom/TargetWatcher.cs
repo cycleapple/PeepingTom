@@ -57,7 +57,7 @@ namespace PeepingTom
 
         private void Update()
         {
-            var player = Plugin.ObjectTable.LocalPlayer;
+            var player = Plugin.ClientState.LocalPlayer;
             if (player == null)
             {
                 return;

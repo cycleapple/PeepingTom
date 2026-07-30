@@ -117,7 +117,7 @@ namespace PeepingTom
                 goto EndDummy;
             }
 
-            var player = plugin.ObjectTable.LocalPlayer;
+            var player = plugin.ClientState.LocalPlayer;
             if (player == null)
             {
                 goto EndDummy;
@@ -368,7 +368,7 @@ namespace PeepingTom
                 var dict = new Dictionary<ulong, IGameObject>();
                 foreach (var obj in plugin.ObjectTable)
                 {
-                    if (dict.ContainsKey(obj.GameObjectId) || obj.ObjectKind != ObjectKind.Pc)
+                    if (dict.ContainsKey(obj.GameObjectId) || obj.ObjectKind != ObjectKind.Player)
                     {
                         continue;
                     }
@@ -586,7 +586,7 @@ namespace PeepingTom
 
         private IPlayerCharacter? GetCurrentTarget()
         {
-            var player = plugin.ObjectTable.LocalPlayer;
+            var player = plugin.ClientState.LocalPlayer;
             if (player == null)
             {
                 return null;

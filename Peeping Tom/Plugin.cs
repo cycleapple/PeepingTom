@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.Command;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
@@ -112,7 +113,7 @@ namespace PeepingTom
             Language.Culture = new CultureInfo(langCode);
         }
 
-        private void OnTerritoryChange(uint territoryId)
+        private void OnTerritoryChange(ushort territoryId)
         {
             UpdatePvpState(territoryId);
         }

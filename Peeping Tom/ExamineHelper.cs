@@ -25,7 +25,6 @@ namespace PeepingTom
             var data = new InfoProxyCommonList.CharacterData
             {
                 ContentId = character->ContentId,
-                AccountId = character->AccountId,
                 State = InfoProxyCommonList.CharacterData.OnlineStatus.Online,
                 CurrentWorld = character->CurrentWorld,
                 HomeWorld = character->HomeWorld,
